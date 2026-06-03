@@ -18,15 +18,16 @@ self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((ks) =>
       Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    )
+    ).then(() => self.clients.claim())
   );
-  self.clients.claim();
+});
+
+self.addEventListener("message", (e) => {
+  if (e.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("fetch", (e) => {
   e.respondWith(
-    caches
-      .match(e.request, { ignoreSearch: true })
-      .then((r) => r || fetch(e.request))
+    caches.match(e.request, { ignoreSearch: true }).then((r) => r || fetch(e.request))
   );
 });
