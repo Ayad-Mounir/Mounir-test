@@ -661,32 +661,49 @@
     });
   }
 
-  // --- Service Worker + Auto Update ---
-  const APP_VER = '4.0';
+  // --- Version & Update ---
+  const APP_VER = document.querySelector('meta[name="app-version"]')?.content || '1.00';
+  const updateBanner = $('#updateBanner');
+  const updateBtn = $('#updateBtn');
+  const verDisplay = $('#verDisplay');
+
+  verDisplay.textContent = APP_VER;
+
+  function checkForUpdate() {
+    const knownVer = localStorage.getItem('calcVer');
+    fetch('version.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(r => r.json())
+      .then(data => {
+        const serverVer = data.version;
+        if (knownVer && knownVer !== serverVer) {
+          updateBanner.classList.add('show');
+        }
+        localStorage.setItem('calcVer', serverVer);
+        verDisplay.textContent = serverVer;
+      })
+      .catch(() => {});
+  }
+
+  function applyUpdate() {
+    if ('serviceWorker' in navigator) {
+      caches.keys().then(ks => Promise.all(ks.map(k => caches.delete(k))));
+      navigator.serviceWorker.getRegistration().then(r => r?.unregister());
+      setTimeout(() => window.location.reload(), 300);
+    } else {
+      window.location.reload();
+    }
+  }
 
   function registerSW() {
     if (!('serviceWorker' in navigator)) return;
+
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (!refreshing) { refreshing = true; window.location.reload(); }
     });
 
     navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => {
-      // Force check for updates every time the app opens
       reg.update();
-
-      reg.addEventListener('updatefound', () => {
-        const sw = reg.installing;
-        sw.addEventListener('statechange', () => {
-          if (sw.state === 'installed' && navigator.serviceWorker.controller) {
-            sw.postMessage({ type: 'SKIP_WAITING' });
-            // Wait a moment then reload to activate new version
-            setTimeout(() => {
-              if (!refreshing) { refreshing = true; window.location.reload(); }
-            }, 500);
-          }
-        });
-      });
     });
   }
 
@@ -701,10 +718,9 @@
     updateDisplay();
     bindEvents();
     registerSW();
+    checkForUpdate();
 
-    // Show version in footer
-    const footer = document.querySelector('footer span');
-    if (footer) footer.textContent = `CalcMaster Pro v${APP_VER} © 2026`;
+    updateBtn.addEventListener('click', applyUpdate);
   }
 
   init();

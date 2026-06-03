@@ -10,6 +10,8 @@
   <link rel="icon" href="icon-192.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon-192.svg">
   <title>CalcMaster Pro</title>
+  <meta name="app-version" content="1.04">
+  <meta name="app-build" content="2026-06-03">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -31,6 +33,10 @@
     </header>
 
     <div id="toast" class="toast"></div>
+    <div id="updateBanner" class="update-banner">
+      <span>📦 تحديث جديد متاح</span>
+      <button id="updateBtn">تحديث الآن</button>
+    </div>
 
     <div class="history-panel" id="historyPanel">
       <div class="history-header">
@@ -111,7 +117,7 @@
     </div>
 
     <footer>
-      <span>CalcMaster Pro © 2026</span>
+      <span>CalcMaster Pro v<span id="verDisplay">1.04</span> © 2026</span>
     </footer>
   </div>
 
