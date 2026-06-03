@@ -14,6 +14,7 @@
     history: JSON.parse(localStorage.getItem('calcHistory') || '[]'),
     mode: 'basic',
     theme: localStorage.getItem('calcTheme') || 'dark',
+    convertLang: localStorage.getItem('calcLang') || 'ar',
   };
 
   const $ = (s) => document.querySelector(s);
@@ -22,6 +23,8 @@
   const displayEl = $('#display');
   const exprEl = $('#expression');
   const sciPanel = $('#sciPanel');
+  const convertPanel = $('#convertPanel');
+  const convertOutput = $('#convertOutput');
   const historyPanel = $('#historyPanel');
   const historyList = $('#historyList');
   const toastEl = $('#toast');
@@ -58,6 +61,7 @@
     }
     displayEl.textContent = d;
     exprEl.textContent = state.expression;
+    if (state.mode === 'convert') updateConvert();
   }
 
   // --- History ---
@@ -294,6 +298,207 @@
     return Math.pow(a, b);
   }
 
+  // --- Number to Words ---
+  const NU = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
+  const NU2 = ['', 'أحد', 'اثنا', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
+  const TENS = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
+  const TEENS = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
+
+  function arUnder1000(n) {
+    if (n === 0) return '';
+    let s = '';
+    const h = Math.floor(n / 100);
+    const r = n % 100;
+    if (h === 1) s += 'مئة';
+    else if (h === 2) s += 'مئتان';
+    else if (h > 2) s += NU[h] + ' مئة';
+    if (r === 0) return s;
+    if (s) s += ' و';
+    if (r < 10) s += NU[r];
+    else if (r < 20) s += TEENS[r - 10];
+    else {
+      const u = r % 10;
+      const t = Math.floor(r / 10);
+      if (u) s += NU[u] + ' و';
+      s += TENS[t];
+    }
+    return s;
+  }
+
+  function numToAr(n) {
+    if (n === 0) return 'صفر';
+    if (n < 0) return 'سالب ' + numToAr(-n);
+    const groups = [
+      [1e9, 'مليار', 'ملياران', 'مليارات'],
+      [1e6, 'مليون', 'مليونان', 'ملايين'],
+      [1e3, 'ألف', 'ألفان', 'آلاف'],
+    ];
+    let s = '';
+    let rem = n;
+    for (const [div, sg, dual, pl] of groups) {
+      const q = Math.floor(rem / div);
+      if (q > 0) {
+        if (s) s += ' و';
+        if (q === 1) s += sg;
+        else if (q === 2) s += dual;
+        else if (q <= 10) s += NU[q] + ' ' + pl;
+        else s += arUnder1000(q) + ' ' + sg;
+      }
+      rem %= div;
+    }
+    if (rem > 0) {
+      if (s) s += ' و';
+      s += arUnder1000(rem);
+    }
+    return s;
+  }
+
+  function numToFr(n) {
+    if (n === 0) return 'zéro';
+    if (n < 0) return 'moins ' + numToFr(-n);
+    const units = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf',
+      'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize'];
+    const tens = ['', '', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante-dix',
+      'quatre-vingt', 'quatre-vingt-dix'];
+
+    function under1000(x) {
+      if (x === 0) return '';
+      let s = '';
+      const c = Math.floor(x / 100);
+      const r = x % 100;
+      if (c === 1) s += 'cent';
+      else if (c > 1) {
+        s += units[c] + ' cent';
+        if (r === 0 && c > 1) s += 's';
+      }
+      if (r > 0) {
+        if (s) s += ' ';
+        if (r < 17) s += units[r];
+        else if (r < 20) s += 'dix-' + units[r - 10];
+        else {
+          const u = r % 10;
+          const t = Math.floor(r / 10);
+          if (t === 7 || t === 9) {
+            const base = (t === 7) ? 60 : 80;
+            const offset = r - base;
+            if (t === 7) {
+              s += 'soixante-';
+              if (offset === 1) s += 'et ';
+              s += (offset < 17) ? units[offset] : 'dix-' + units[offset - 10];
+            } else {
+              s += 'quatre-vingt-';
+              if (offset === 0) s += 's';
+              else s += units[offset];
+            }
+          } else {
+            s += tens[t];
+            if (u === 1 && t < 7) s += ' et un';
+            else if (u > 1) s += '-' + units[u];
+          }
+        }
+      }
+      return s;
+    }
+
+    const groups = [
+      [1e9, 'milliard'],
+      [1e6, 'million'],
+      [1e3, 'mille'],
+    ];
+    let s = '';
+    let rem = n;
+    for (const [div, name] of groups) {
+      const q = Math.floor(rem / div);
+      if (q > 0) {
+        if (s) s += ' ';
+        if (q === 1 && name !== 'mille') s += 'un ' + name;
+        else {
+          s += under1000(q) + ' ' + name;
+          if (q > 1 && name !== 'mille') s += 's';
+        }
+      }
+      rem %= div;
+    }
+    if (rem > 0) {
+      if (s) s += ' ';
+      s += under1000(rem);
+    }
+    return s;
+  }
+
+  function numToEn(n) {
+    if (n === 0) return 'zero';
+    if (n < 0) return 'negative ' + numToEn(-n);
+    const units = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+      'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
+      'seventeen', 'eighteen', 'nineteen'];
+    const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+
+    function under1000(x) {
+      if (x === 0) return '';
+      let s = '';
+      const h = Math.floor(x / 100);
+      const r = x % 100;
+      if (h) s += units[h] + ' hundred';
+      if (r) {
+        if (s) s += ' ';
+        if (r < 20) s += units[r];
+        else {
+          const u = r % 10;
+          const t = Math.floor(r / 10);
+          s += tens[t];
+          if (u) s += '-' + units[u];
+        }
+      }
+      return s;
+    }
+
+    const groups = [
+      [1e9, 'billion'],
+      [1e6, 'million'],
+      [1e3, 'thousand'],
+    ];
+    let s = '';
+    let rem = n;
+    for (const [div, name] of groups) {
+      const q = Math.floor(rem / div);
+      if (q > 0) {
+        if (s) s += ' ';
+        s += under1000(q) + ' ' + name;
+        if (q > 1) s += 's';
+      }
+      rem %= div;
+    }
+    if (rem > 0) {
+      if (s) s += ' ';
+      s += under1000(rem);
+    }
+    return s;
+  }
+
+  function updateConvert() {
+    const v = parseFloat(state.display);
+    const el = convertOutput;
+    if (isNaN(v) || !isFinite(v)) {
+      el.textContent = '—';
+      return;
+    }
+    if (v > 999999999999 || v < -999999999999) {
+      el.textContent = 'الرقم كبير جداً';
+      return;
+    }
+    if (v % 1 !== 0) {
+      el.textContent = 'الأعداد العشرية غير مدعومة';
+      return;
+    }
+    const n = Math.round(v);
+    switch (state.convertLang) {
+      case 'ar': el.textContent = numToAr(n); break;
+      case 'fr': el.textContent = numToFr(n); break;
+      case 'en': el.textContent = numToEn(n); break;
+    }
+  }
+
   // --- Main input handler ---
   function handleInput(action, value) {
     if (action === 'num') {
@@ -360,6 +565,19 @@
         tab.classList.add('active');
         state.mode = tab.dataset.mode;
         sciPanel.classList.toggle('visible', state.mode === 'sci');
+        convertPanel.classList.toggle('visible', state.mode === 'convert');
+        if (state.mode === 'convert') updateConvert();
+      });
+    });
+
+    // Language buttons
+    $$('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        $$('.lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.convertLang = btn.dataset.lang;
+        localStorage.setItem('calcLang', state.convertLang);
+        if (state.mode === 'convert') updateConvert();
       });
     });
 
@@ -444,7 +662,7 @@
   }
 
   // --- Service Worker + Auto Update ---
-  const APP_VER = '3.0';
+  const APP_VER = '4.0';
 
   function registerSW() {
     if (!('serviceWorker' in navigator)) return;
@@ -476,6 +694,9 @@
   function init() {
     document.body.classList.toggle('light', state.theme === 'light');
     if (state.theme === 'light') $('#themeBtn').textContent = '☀️';
+    $$('.lang-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.lang === state.convertLang);
+    });
     renderHistory();
     updateDisplay();
     bindEvents();
