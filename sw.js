@@ -1,5 +1,5 @@
 const CACHE = "calc-v1";
-const URLS = ["/", "/index.html", "/style.css", "/script.js", "/manifest.json", "/icon-192.svg", "/icon-512.svg"];
+const URLS = ["/Mounir-test/", "/Mounir-test/index.html", "/Mounir-test/style.css", "/Mounir-test/script.js", "/Mounir-test/manifest.json", "/Mounir-test/icon-192.svg", "/Mounir-test/icon-512.svg"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(URLS)));
