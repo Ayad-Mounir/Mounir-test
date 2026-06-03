@@ -1,4 +1,4 @@
-const CACHE = "cm-v5";
+const CACHE = "cm-v6";
 
 self.addEventListener("install", (e) => {
   e.waitUntil(

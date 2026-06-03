@@ -476,27 +476,65 @@
     return s;
   }
 
+  const AR_DIGITS = ['صفر', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
+  const FR_DIGITS = ['zéro', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+  const EN_DIGITS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+
   function updateConvert() {
-    const v = parseFloat(state.display);
     const el = convertOutput;
+    const raw = state.display;
+    const v = parseFloat(raw);
+
     if (isNaN(v) || !isFinite(v)) {
       el.textContent = '—';
       return;
     }
-    if (v > 999999999999 || v < -999999999999) {
-      el.textContent = 'الرقم كبير جداً';
+    if (Math.abs(v) > 999999999999) {
+      el.textContent = state.convertLang === 'ar' ? 'الرقم كبير جداً' :
+                       state.convertLang === 'fr' ? 'Nombre trop grand' : 'Number too large';
       return;
     }
-    if (v % 1 !== 0) {
-      el.textContent = 'الأعداد العشرية غير مدعومة';
-      return;
-    }
-    const n = Math.round(v);
+
+    const parts = raw.split('.');
+    const intPart = parseInt(parts[0], 10);
+
+    let result = '';
+    const neg = v < 0;
+    const absInt = Math.abs(intPart);
+
     switch (state.convertLang) {
-      case 'ar': el.textContent = numToAr(n); break;
-      case 'fr': el.textContent = numToFr(n); break;
-      case 'en': el.textContent = numToEn(n); break;
+      case 'ar':
+        result = neg ? 'سالب ' : '';
+        result += absInt === 0 && parts.length === 1 ? 'صفر' : numToAr(absInt);
+        if (parts.length > 1 && parts[1]) {
+          result += ' فاصل';
+          for (const ch of parts[1]) {
+            result += ' ' + (AR_DIGITS[parseInt(ch, 10)] || ch);
+          }
+        }
+        break;
+      case 'fr':
+        result = neg ? 'moins ' : '';
+        result += absInt === 0 && parts.length === 1 ? 'zéro' : numToFr(absInt);
+        if (parts.length > 1 && parts[1]) {
+          result += ' virgule';
+          for (const ch of parts[1]) {
+            result += ' ' + (FR_DIGITS[parseInt(ch, 10)] || ch);
+          }
+        }
+        break;
+      case 'en':
+        result = neg ? 'negative ' : '';
+        result += absInt === 0 && parts.length === 1 ? 'zero' : numToEn(absInt);
+        if (parts.length > 1 && parts[1]) {
+          result += ' point';
+          for (const ch of parts[1]) {
+            result += ' ' + (EN_DIGITS[parseInt(ch, 10)] || ch);
+          }
+        }
+        break;
     }
+    el.textContent = result;
   }
 
   // --- Main input handler ---
