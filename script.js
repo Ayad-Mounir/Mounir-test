@@ -446,24 +446,22 @@
   // --- Service Worker + Auto Update ---
   function registerSW() {
     if ('serviceWorker' in navigator) {
-      const scope = document.querySelector('base')?.getAttribute('href') || '/Mounir-test/';
-      navigator.serviceWorker.register('sw.js', { scope: scope }).then((reg) => {
+      navigator.serviceWorker.register('sw.js').then((reg) => {
         reg.addEventListener('updatefound', () => {
-          const newSW = reg.installing;
-          newSW.addEventListener('statechange', () => {
-            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-              showToast('تحديث متاح ✓ أعد فتح التطبيق');
-              if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          const sw = reg.installing;
+          sw.addEventListener('statechange', () => {
+            if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+              showToast('تحديث جديد - أعد الفتح');
             }
           });
         });
+        if (reg.active) {
+          reg.active.postMessage({ type: 'SKIP_WAITING' });
+        }
       });
-
       let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (refreshing) return;
-        refreshing = true;
-        window.location.reload();
+        if (!refreshing) { refreshing = true; window.location.reload(); }
       });
     }
   }

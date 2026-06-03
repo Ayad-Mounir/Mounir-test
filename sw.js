@@ -1,21 +1,15 @@
-const CACHE = "calc-v2";
-const SCOPE = self.registration.scope;
-
-const URLS = [
-  SCOPE,
-  SCOPE + "index.html",
-  SCOPE + "style.css",
-  SCOPE + "script.js",
-  SCOPE + "manifest.json",
-  SCOPE + "icon-192.svg",
-  SCOPE + "icon-512.svg",
-];
+const CACHE = "cm-v3";
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
-    caches.open(CACHE).then((c) => {
-      return Promise.allSettled(URLS.map((u) => c.add(u).catch(() => {})));
-    })
+    caches.open(CACHE).then((c) =>
+      c.addAll([
+        "/Mounir-test/",
+        "/Mounir-test/index.html",
+        "/Mounir-test/style.css",
+        "/Mounir-test/script.js",
+      ])
+    )
   );
   self.skipWaiting();
 });
@@ -30,17 +24,9 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET") return;
   e.respondWith(
-    caches.match(e.request).then((r) => {
-      const fetchPromise = fetch(e.request).then((res) => {
-        if (res.ok) {
-          const clone = res.clone();
-          caches.open(CACHE).then((c) => c.put(e.request, clone));
-        }
-        return res;
-      });
-      return r || fetchPromise;
-    })
+    caches
+      .match(e.request, { ignoreSearch: true })
+      .then((r) => r || fetch(e.request))
   );
 });
