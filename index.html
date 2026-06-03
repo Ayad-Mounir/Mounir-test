@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-192.svg">
+  <title>CalcMaster Pro</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <header>
+      <div class="header-left">
+        <button class="icon-btn" id="menuBtn" aria-label="القائمة">☰</button>
+        <div class="brand">
+          <span class="brand-icon">∑</span>
+          <span class="brand-text">CalcMaster</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="icon-btn" id="themeBtn" aria-label="السمة">🌙</button>
+        <button class="icon-btn" id="histBtn" aria-label="السجل">⏱</button>
+      </div>
+    </header>
+
+    <div id="toast" class="toast"></div>
+
+    <div class="history-panel" id="historyPanel">
+      <div class="history-header">
+        <h3>السجل</h3>
+        <button class="icon-btn" id="clearHist">🗑</button>
+        <button class="icon-btn" id="closeHist">✕</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+
+    <div class="calc-body">
+
+      <div class="expression" id="expression"></div>
+      <div class="display" id="display">0</div>
+
+      <div class="mode-tabs">
+        <button class="mode-tab active" data-mode="basic">أساسي</button>
+        <button class="mode-tab" data-mode="sci">علمي</button>
+      </div>
+
+      <div class="sci-panel" id="sciPanel">
+        <button class="sci-btn">sin</button>
+        <button class="sci-btn">cos</button>
+        <button class="sci-btn">tan</button>
+        <button class="sci-btn">log</button>
+        <button class="sci-btn">ln</button>
+        <button class="sci-btn">√</button>
+        <button class="sci-btn">x²</button>
+        <button class="sci-btn">x³</button>
+        <button class="sci-btn">xʸ</button>
+        <button class="sci-btn">π</button>
+        <button class="sci-btn">e</button>
+        <button class="sci-btn">!</button>
+        <button class="sci-btn">1/x</button>
+        <button class="sci-btn">|x|</button>
+        <button class="sci-btn">(</button>
+        <button class="sci-btn">)</button>
+      </div>
+
+      <div class="buttons">
+
+        <button class="btn btn-clear" data-action="clear">AC</button>
+        <button class="btn btn-clear" data-action="backspace">⌫</button>
+        <button class="btn btn-op" data-action="percent">%</button>
+        <button class="btn btn-op" data-action="divide">÷</button>
+
+        <button class="btn btn-num" data-value="7">7</button>
+        <button class="btn btn-num" data-value="8">8</button>
+        <button class="btn btn-num" data-value="9">9</button>
+        <button class="btn btn-op" data-action="multiply">×</button>
+
+        <button class="btn btn-num" data-value="4">4</button>
+        <button class="btn btn-num" data-value="5">5</button>
+        <button class="btn btn-num" data-value="6">6</button>
+        <button class="btn btn-op" data-action="subtract">−</button>
+
+        <button class="btn btn-num" data-value="1">1</button>
+        <button class="btn btn-num" data-value="2">2</button>
+        <button class="btn btn-num" data-value="3">3</button>
+        <button class="btn btn-op" data-action="add">+</button>
+
+        <button class="btn btn-num btn-neg" data-action="negate">±</button>
+        <button class="btn btn-num" data-value="0">0</button>
+        <button class="btn btn-num" data-action="decimal">.</button>
+        <button class="btn btn-equals" data-action="equals">=</button>
+
+      </div>
+    </div>
+
+    <footer>
+      <span>CalcMaster Pro © 2026</span>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
