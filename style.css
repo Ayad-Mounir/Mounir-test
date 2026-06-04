@@ -365,6 +365,34 @@ header {
   border-radius: var(--radius-xs);
 }
 
+.curr-selector {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  background: var(--bg-card);
+  border-radius: var(--radius-xs);
+  overflow-x: auto;
+}
+
+.curr-btn {
+  flex: 1;
+  min-width: 38px;
+  padding: 5px 4px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.curr-btn.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
 .lang-btn {
   flex: 1;
   padding: 6px;

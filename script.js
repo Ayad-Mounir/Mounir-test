@@ -15,6 +15,7 @@
     mode: 'basic',
     theme: localStorage.getItem('calcTheme') || 'dark',
     convertLang: localStorage.getItem('calcLang') || 'ar',
+    currency: localStorage.getItem('calcCurrency') || '',
   };
 
   const $ = (s) => document.querySelector(s);
@@ -485,6 +486,57 @@
   const FR_DIGITS = ['zéro', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
   const EN_DIGITS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
 
+  // --- Currencies ---
+  var CURRENCIES = {
+    MAD: {
+      ar: { name: 'درهم', dual: 'درهمان', plural: 'دراهم', sub: 'سنتيم', subDual: 'سنتيمان', subPlural: 'سنتيمات' },
+      fr: { name: 'dirham', plural: 'dirhams', sub: 'centime', subPlural: 'centimes' },
+      en: { name: 'dirham', plural: 'dirhams', sub: 'centime', subPlural: 'centimes' },
+    },
+    USD: {
+      ar: { name: 'دولار', dual: 'دولاران', plural: 'دولارات', sub: 'سنت', subDual: 'سنتان', subPlural: 'سنتات' },
+      fr: { name: 'dollar', plural: 'dollars', sub: 'cent', subPlural: 'cents' },
+      en: { name: 'dollar', plural: 'dollars', sub: 'cent', subPlural: 'cents' },
+    },
+    EUR: {
+      ar: { name: 'يورو', dual: 'يوروان', plural: 'يورو', sub: 'سنت', subDual: 'سنتان', subPlural: 'سنتات' },
+      fr: { name: 'euro', plural: 'euros', sub: 'centime', subPlural: 'centimes' },
+      en: { name: 'euro', plural: 'euros', sub: 'cent', subPlural: 'cents' },
+    },
+    GBP: {
+      ar: { name: 'جنيه', dual: 'جنيهان', plural: 'جنيهات', sub: 'بنس', subDual: 'بنسان', subPlural: 'بنسات' },
+      fr: { name: 'livre', plural: 'livres', sub: 'penny', subPlural: 'pence' },
+      en: { name: 'pound', plural: 'pounds', sub: 'penny', subPlural: 'pence' },
+    },
+  };
+
+  // Arabic noun agreement helpers
+  function arNounForm(n, singular, dual, plural) {
+    if (n === 0) return singular; // will be handled separately
+    if (n === 1) return singular;
+    if (n === 2) return dual;
+    if (n >= 3 && n <= 10) return plural;
+    return singular; // 11+ defaults to singular
+  }
+
+  function arNumberPrefix(n, lang) {
+    if (lang !== 'ar') return '';
+    if (n === 0) return '';
+    if (n === 1) return ''; // noun alone for 1
+    if (n === 2) return ''; // dual noun for 2
+    return numToAr(n) + ' ';
+  }
+
+  function frNounForm(n, singular, plural) {
+    if (n === 0 || n === 1) return singular;
+    return plural;
+  }
+
+  function enNounForm(n, singular, plural) {
+    if (n === 0 || n === 1) return singular;
+    return plural;
+  }
+
   function updateConvert() {
     const el = convertOutput;
     const raw = state.display;
@@ -502,12 +554,80 @@
 
     const parts = raw.split('.');
     const intPart = parseInt(parts[0], 10);
+    var lang = state.convertLang;
 
-    let result = '';
-    const neg = v < 0;
-    const absInt = Math.abs(intPart);
+    // If a currency is selected
+    var currCode = state.currency;
+    if (currCode && CURRENCIES[currCode]) {
+      var curr = CURRENCIES[currCode][lang];
+      if (!curr) curr = CURRENCIES[currCode]['en']; // fallback
+      var result = '';
+      var neg = v < 0;
+      var absInt = Math.abs(intPart);
+      var decStr = parts.length > 1 ? parts[1] : '';
+      var decVal = decStr ? parseInt(decStr, 10) : 0;
 
-    switch (state.convertLang) {
+      if (lang === 'ar') {
+        if (neg) result += 'سالب ';
+
+        // Integer part
+        if (absInt === 0 && !decStr) {
+          result += 'صفر';
+        } else if (absInt === 1) {
+          result += curr.name + ' واحد'; // درهم واحد
+        } else if (absInt === 2) {
+          result += curr.dual; // درهمان
+        } else if (absInt >= 3 && absInt <= 10) {
+          result += numToAr(absInt) + ' ' + curr.plural;
+        } else if (absInt > 10) {
+          result += numToAr(absInt) + ' ' + curr.name + 'اً';
+        }
+
+        // Decimal part
+        if (decStr && decVal > 0) {
+          if (absInt > 0) result += ' و';
+          if (decVal === 1) {
+            result += curr.sub + ' واحد';
+          } else if (decVal === 2) {
+            result += curr.subDual;
+          } else if (decVal >= 3 && decVal <= 10) {
+            result += numToAr(decVal) + ' ' + curr.subPlural;
+          } else {
+            result += numToAr(decVal) + ' ' + curr.sub + 'اً';
+          }
+        }
+      } else {
+        // French / English
+        if (neg) result += lang === 'fr' ? 'moins ' : 'negative ';
+
+        // Integer part
+        if (absInt === 0 && !decStr) {
+          result += lang === 'fr' ? 'zéro' : 'zero';
+        } else {
+          var intWords = lang === 'fr' ? numToFr(absInt) : numToEn(absInt);
+          var intForm = lang === 'fr' ? frNounForm(absInt, curr.name, curr.plural) : enNounForm(absInt, curr.name, curr.plural);
+          result += intWords + ' ' + intForm;
+        }
+
+        // Decimal part
+        if (decStr && decVal > 0) {
+          result += ' ' + (lang === 'fr' ? 'et' : 'and') + ' ';
+          var decWords = lang === 'fr' ? numToFr(decVal) : numToEn(decVal);
+          var decForm = lang === 'fr' ? frNounForm(decVal, curr.sub, curr.subPlural) : enNounForm(decVal, curr.sub, curr.subPlural);
+          result += decWords + ' ' + decForm;
+        }
+      }
+
+      el.textContent = result;
+      return;
+    }
+
+    // Original number-to-words mode (no currency)
+    result = '';
+    neg = v < 0;
+    absInt = Math.abs(intPart);
+
+    switch (lang) {
       case 'ar':
         result = neg ? 'سالب ' : '';
         result += absInt === 0 && parts.length === 1 ? 'صفر' : numToAr(absInt);
@@ -723,6 +843,17 @@
       });
     });
 
+    // Currency buttons
+    $$('.curr-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        $$('.curr-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.currency = btn.dataset.curr;
+        localStorage.setItem('calcCurrency', state.currency);
+        if (state.mode === 'convert') updateConvert();
+      });
+    });
+
     // Age calculator
     function calcAndSaveAge() {
       calculateAge();
@@ -871,6 +1002,9 @@
     if (state.theme === 'light') $('#themeBtn').textContent = '☀️';
     $$('.lang-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.lang === state.convertLang);
+    });
+    $$('.curr-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.curr === state.currency);
     });
     renderHistory();
     updateDisplay();
