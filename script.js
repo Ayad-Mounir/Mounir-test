@@ -25,6 +25,11 @@
   const sciPanel = $('#sciPanel');
   const convertPanel = $('#convertPanel');
   const convertOutput = $('#convertOutput');
+  const agePanel = $('#agePanel');
+  const ageDay = $('#ageDay');
+  const ageMonth = $('#ageMonth');
+  const ageYear = $('#ageYear');
+  const ageBtn = $('#ageBtn');
   const historyPanel = $('#historyPanel');
   const historyList = $('#historyList');
   const toastEl = $('#toast');
@@ -537,6 +542,100 @@
     el.textContent = result;
   }
 
+  // --- Age Calculator ---
+  function initAgeSelects() {
+    // Year: 1900 to current
+    var cy = new Date().getFullYear();
+    ageYear.innerHTML = '';
+    for (var y = cy; y >= 1900; y--) {
+      var opt = document.createElement('option');
+      opt.value = y; opt.textContent = y;
+      ageYear.appendChild(opt);
+    }
+    // Month: 1-12
+    ageMonth.innerHTML = '';
+    for (var m = 1; m <= 12; m++) {
+      var opt = document.createElement('option');
+      opt.value = m; opt.textContent = m;
+      ageMonth.appendChild(opt);
+    }
+    // Day: 1-31
+    ageDay.innerHTML = '';
+    for (var d = 1; d <= 31; d++) {
+      var opt = document.createElement('option');
+      opt.value = d; opt.textContent = d;
+      ageDay.appendChild(opt);
+    }
+    // Set default to 18 years ago so user sees something meaningful
+    var def = new Date();
+    ageYear.value = def.getFullYear() - 18;
+    ageMonth.value = def.getMonth() + 1;
+    ageDay.value = Math.min(def.getDate(), 28);
+  }
+
+  function calculateAge() {
+    var y = parseInt(ageYear.value);
+    var m = parseInt(ageMonth.value);
+    var d = parseInt(ageDay.value);
+    if (!y || !m || !d) {
+      showToast('⚠️ الرجاء اختيار تاريخ كامل');
+      return;
+    }
+
+    var birth = new Date(y, m - 1, d);
+    var now = new Date();
+
+    if (birth > now) {
+      showToast('⚠️ التاريخ لا يمكن أن يكون في المستقبل');
+      return;
+    }
+
+    // Difference in ms
+    var diffMs = now - birth;
+
+    // ---- Precise years, months, days ----
+    var years = now.getFullYear() - birth.getFullYear();
+    var months = now.getMonth() - birth.getMonth();
+    var days = now.getDate() - birth.getDate();
+
+    if (days < 0) {
+      months--;
+      // Days in previous month
+      var prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+      days += prevMonth.getDate();
+    }
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    // ---- Totals ----
+    var totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    var totalWeeks = Math.floor(totalDays / 7);
+    var totalHours = Math.floor(diffMs / (1000 * 60 * 60));
+    var totalMinutes = Math.floor(diffMs / (1000 * 60));
+
+    // ---- Update UI with animation ----
+    var els = [
+      { el: $('#ageYearsVal'), val: years, suffix: ' 🎂' },
+      { el: $('#ageMonthsVal'), val: months, suffix: '' },
+      { el: $('#ageWeeksVal'), val: totalWeeks.toLocaleString(), suffix: '' },
+      { el: $('#ageDaysVal'), val: totalDays.toLocaleString(), suffix: '' },
+      { el: $('#ageHoursVal'), val: totalHours.toLocaleString(), suffix: '' },
+      { el: $('#ageMinsVal'), val: totalMinutes.toLocaleString(), suffix: '' },
+    ];
+
+    els.forEach(function(item) {
+      var el = item.el;
+      if (!el) return;
+      // Remove animation then re-add for visual feedback
+      el.style.animation = 'none';
+      el.offsetHeight; // force reflow
+      el.textContent = item.val + item.suffix;
+      el.style.animation = 'fadeIn 0.4s ease';
+    });
+  }
+
   // --- Main input handler ---
   function handleInput(action, value) {
     if (action === 'num') {
@@ -603,8 +702,13 @@
         tab.classList.add('active');
         state.mode = tab.dataset.mode;
         sciPanel.classList.toggle('visible', state.mode === 'sci');
+        agePanel.classList.toggle('visible', state.mode === 'age');
         convertPanel.classList.toggle('visible', state.mode === 'convert');
         if (state.mode === 'convert') updateConvert();
+        if (state.mode === 'age') {
+          if (ageYear.options.length === 0) initAgeSelects();
+          calculateAge();
+        }
       });
     });
 
@@ -618,6 +722,22 @@
         if (state.mode === 'convert') updateConvert();
       });
     });
+
+    // Age calculator
+    function calcAndSaveAge() {
+      calculateAge();
+      // Store date for recall
+      localStorage.setItem('ageY', ageYear.value);
+      localStorage.setItem('ageM', ageMonth.value);
+      localStorage.setItem('ageD', ageDay.value);
+    }
+
+    ageBtn.addEventListener('click', calcAndSaveAge);
+
+    // Auto-calculate on select change
+    ageYear.addEventListener('change', calcAndSaveAge);
+    ageMonth.addEventListener('change', calcAndSaveAge);
+    ageDay.addEventListener('change', calcAndSaveAge);
 
     // Theme toggle
     $('#themeBtn').addEventListener('click', () => {
@@ -757,6 +877,15 @@
     bindEvents();
     registerSW();
     checkForUpdate();
+
+    // Init age selects and restore saved date
+    initAgeSelects();
+    var savedY = localStorage.getItem('ageY');
+    if (savedY) {
+      ageYear.value = savedY;
+      ageMonth.value = localStorage.getItem('ageM') || 1;
+      ageDay.value = localStorage.getItem('ageD') || 1;
+    }
 
     updateBtn.addEventListener('click', applyUpdate);
   }

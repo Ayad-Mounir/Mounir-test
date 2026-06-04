@@ -6,13 +6,13 @@
   <meta name="theme-color" content="#0a0a1a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="manifest.json?v=1.08">
+  <link rel="manifest" href="manifest.json?v=1.09">
   <link rel="icon" href="icon-192.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon-192.svg">
   <title>CalcMaster Pro</title>
-  <meta name="app-version" content="1.08">
-  <meta name="app-build" content="2026-06-03">
-  <link rel="stylesheet" href="style.css?v=1.08">
+  <meta name="app-version" content="1.09">
+  <meta name="app-build" content="2026-06-04">
+  <link rel="stylesheet" href="style.css?v=1.09">
   <style>
     #updateBanner {
       display: none;
@@ -124,7 +124,7 @@
         <div class="brand">
           <span class="brand-icon">∑</span>
           <span class="brand-text">CalcMaster</span>
-          <span class="version-badge" id="headerVer">v1.08</span>
+          <span class="version-badge" id="headerVer">v1.09</span>
         </div>
       </div>
       <div class="header-right">
@@ -156,6 +156,7 @@
       <div class="mode-tabs">
         <button class="mode-tab active" data-mode="basic">أساسي</button>
         <button class="mode-tab" data-mode="sci">علمي</button>
+        <button class="mode-tab" data-mode="age">عمر</button>
         <button class="mode-tab" data-mode="convert">كتابة</button>
       </div>
 
@@ -176,6 +177,50 @@
         <button class="sci-btn">|x|</button>
         <button class="sci-btn">(</button>
         <button class="sci-btn">)</button>
+      </div>
+
+      <div class="age-panel" id="agePanel">
+        <div class="age-inputs">
+          <div class="age-field">
+            <label>🎂 اليوم</label>
+            <select id="ageDay"></select>
+          </div>
+          <div class="age-field">
+            <label>📅 الشهر</label>
+            <select id="ageMonth"></select>
+          </div>
+          <div class="age-field">
+            <label>📆 السنة</label>
+            <select id="ageYear"></select>
+          </div>
+        </div>
+        <button class="age-btn" id="ageBtn">🔮 حساب العمر</button>
+        <div class="age-results" id="ageResults">
+          <div class="age-card">
+            <div class="age-num" id="ageYearsVal">--</div>
+            <div class="age-unit">سنة</div>
+          </div>
+          <div class="age-card">
+            <div class="age-num" id="ageMonthsVal">--</div>
+            <div class="age-unit">شهر</div>
+          </div>
+          <div class="age-card">
+            <div class="age-num" id="ageWeeksVal">--</div>
+            <div class="age-unit">أسبوع</div>
+          </div>
+          <div class="age-card">
+            <div class="age-num" id="ageDaysVal">--</div>
+            <div class="age-unit">يوم</div>
+          </div>
+          <div class="age-card">
+            <div class="age-num" id="ageHoursVal">--</div>
+            <div class="age-unit">ساعة</div>
+          </div>
+          <div class="age-card">
+            <div class="age-num" id="ageMinsVal">--</div>
+            <div class="age-unit">دقيقة</div>
+          </div>
+        </div>
       </div>
 
       <div class="convert-panel" id="convertPanel">
@@ -218,10 +263,10 @@
     </div>
 
     <footer>
-      <span>CalcMaster Pro v<span id="verDisplay">1.07</span> © 2026</span>
+      <span>CalcMaster Pro v<span id="verDisplay">1.09</span> © 2026</span>
     </footer>
   </div>
 
-  <script src="script.js?v=1.08"></script>
+  <script src="script.js?v=1.09"></script>
 </body>
 </html>
