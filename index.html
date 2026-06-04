@@ -13,28 +13,104 @@
   <meta name="app-version" content="1.08">
   <meta name="app-build" content="2026-06-03">
   <link rel="stylesheet" href="style.css?v=1.08">
+  <style>
+    #updateBanner {
+      display: none;
+      position: fixed;
+      bottom: 80px; left: 50%;
+      transform: translateX(-50%);
+      background: #6c63ff;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 12px;
+      cursor: pointer;
+      z-index: 9999;
+      font-size: 14px;
+      box-shadow: 0 4px 20px rgba(108,99,255,0.4);
+      animation: slideUp 0.4s ease;
+      direction: rtl;
+    }
+    @keyframes slideUp {
+      from { transform: translateX(-50%) translateY(30px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+  </style>
   <script>
   (function(){
-    var lastVer = localStorage.getItem('calcVer');
+    // === Reset mode ===
     if (location.search.includes('reset')) {
       localStorage.clear();
       if ('caches' in window) { caches.keys().then(function(ks){ ks.forEach(function(k){ caches.delete(k); }); }); }
       if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistration().then(function(r){ if (r) r.unregister(); }); }
       setTimeout(function(){ location.href = location.pathname; }, 300);
-    } else {
-      fetch('version.json?x=' + Date.now(), { cache: 'no-store' })
-        .then(function(r){ return r.json(); })
-        .then(function(d){
-          if (lastVer && lastVer !== d.version) {
-            localStorage.clear();
-            if ('caches' in window) { caches.keys().then(function(ks){ ks.forEach(function(k){ caches.delete(k); }); }); }
-            if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistration().then(function(r){ if (r) r.unregister(); }); }
-            setTimeout(function(){ location.reload(); }, 200);
+      return;
+    }
+
+    // === SW Update Detection ===
+    function showUpdateBanner() {
+      var b = document.createElement('div');
+      b.id = 'updateBanner';
+      b.textContent = '🔄 تحديث جديد متوفر — اضغط للتطبيق';
+      b.onclick = function(){
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+        }
+        localStorage.clear();
+        if ('caches' in window) { caches.keys().then(function(ks){ ks.forEach(function(k){ caches.delete(k); }); }); }
+        setTimeout(function(){ location.reload(); }, 300);
+      };
+      document.body.appendChild(b);
+      b.style.display = 'block';
+    }
+
+    if ('serviceWorker' in navigator) {
+      // Register SW
+      navigator.serviceWorker.register('sw.js')
+        .then(function(reg) {
+          // Check if there's already a waiting SW
+          if (reg.waiting) {
+            showUpdateBanner();
           }
-          localStorage.setItem('calcVer', d.version);
+          // Listen for new SW installations
+          reg.addEventListener('updatefound', function() {
+            var newSW = reg.installing;
+            newSW.addEventListener('statechange', function() {
+              if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+                showUpdateBanner();
+              }
+            });
+          });
         })
         .catch(function(){});
+
+      // When a new SW takes over — reload automatically
+      var refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function() {
+        if (!refreshing) {
+          refreshing = true;
+          location.reload();
+        }
+      });
     }
+
+    // === Version Check (bypass SW) ===
+    var lastVer = localStorage.getItem('calcVer');
+    // Use a different URL pattern so SW cache doesn't interfere
+    var vUrl = 'version.json?x=' + Date.now() + '&bypass=' + Math.random();
+    fetch(vUrl, { cache: 'no-store', mode: 'cors' })
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (lastVer && lastVer !== d.version) {
+          localStorage.clear();
+          if ('caches' in window) { caches.keys().then(function(ks){ ks.forEach(function(k){ caches.delete(k); }); }); }
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration().then(function(r){ if (r) r.unregister(); });
+          }
+          setTimeout(function(){ location.reload(); }, 200);
+        }
+        localStorage.setItem('calcVer', d.version);
+      })
+      .catch(function(){});
   })();
   </script>
 </head>
