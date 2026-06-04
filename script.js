@@ -354,6 +354,7 @@
         if (s) s += ' و';
         if (q === 1) s += sg;
         else if (q === 2) s += dual;
+        else if (q === 10) s += 'عشرة ' + pl;
         else if (q <= 10) s += NU[q] + ' ' + pl;
         else s += arUnder1000(q) + ' ' + sg;
       }
