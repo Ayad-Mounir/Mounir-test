@@ -1,4 +1,4 @@
-const CACHE = "cm-v8";
+const CACHE = "cm-v9";
 const VERSION_CHECK = "/calcmaster-pro/version.json";
 
 self.addEventListener("install", (e) => {
