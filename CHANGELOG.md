@@ -1,8 +1,20 @@
 # 📋 Changelog
 
+## v1.13 (2026-06-04)
+### ✨ Features
+- **Memory Functions**: M+, M−, MR, MC مع مؤشر M وامض عند وجود قيمة
+- **Haptic Feedback**: اهتزاز خفيف عند الضغط على الأزرار (8ms)
+- **Digit Grouping**: الأرقام متجمعة بالفواصل (1,000,000)
+
+### 🛠️ Technical
+- حفظ الذاكرة في localStorage عبر الجلسات
+- تحسين `formatNum` باستخدام thousand separators
+
+---
+
 ## v1.12 (2026-06-04)
 ### ✨ Improvements
-- **Digit Grouping**: الأرقام دابا متجمعة بالفواصل (1,000,000 بدل 1000000)
+- **Digit Grouping** (already listed in v1.13 merge)
 - **Copy on Tap**: ضغط على النتيجة ينسخها للحافظة مع إشعار 📋
 - **Long-Press Delete**: ضغط مطوّل على ⌫ يمسح الكل
 - **README**: تحديث badge الإصدار

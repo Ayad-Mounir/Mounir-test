@@ -6,13 +6,13 @@
   <meta name="theme-color" content="#0a0a1a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="manifest.json?v=1.12">
+  <link rel="manifest" href="manifest.json?v=1.13">
   <link rel="icon" href="icon-192.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon-192.svg">
   <title>CalcMaster Pro</title>
-  <meta name="app-version" content="1.12">
+  <meta name="app-version" content="1.13">
   <meta name="app-build" content="2026-06-04">
-  <link rel="stylesheet" href="style.css?v=1.12">
+  <link rel="stylesheet" href="style.css?v=1.13">
   <style>
     #updateBanner {
       display: none;
@@ -124,7 +124,7 @@
         <div class="brand">
           <span class="brand-icon">∑</span>
           <span class="brand-text">CalcMaster</span>
-          <span class="version-badge" id="headerVer">v1.12</span>
+          <span class="version-badge" id="headerVer">v1.13</span>
         </div>
       </div>
       <div class="header-right">
@@ -241,6 +241,14 @@
         <div class="convert-output" id="convertOutput" dir="auto"></div>
       </div>
 
+      <div class="memory-bar">
+        <button class="mem-btn mem-mc" data-mem="mc">MC</button>
+        <button class="mem-btn" data-mem="mr">MR</button>
+        <button class="mem-btn" data-mem="mplus">M+</button>
+        <button class="mem-btn" data-mem="mminus">M−</button>
+        <span class="mem-indicator" id="memIndicator">M</span>
+      </div>
+
       <div class="buttons">
 
         <button class="btn btn-clear" data-action="clear">AC</button>
@@ -272,10 +280,10 @@
     </div>
 
     <footer>
-      <span>CalcMaster Pro v<span id="verDisplay">1.12</span> © 2026</span>
+      <span>CalcMaster Pro v<span id="verDisplay">1.13</span> © 2026</span>
     </footer>
   </div>
 
-  <script src="script.js?v=1.12"></script>
+  <script src="script.js?v=1.13"></script>
 </body>
 </html>

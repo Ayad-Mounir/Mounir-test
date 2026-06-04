@@ -5,7 +5,7 @@
   let state = {
     display: '0',
     expression: '',
-    memory: 0,
+    memory: parseFloat(localStorage.getItem('calcMemory')) || 0,
     operator: null,
     prevValue: null,
     resetNext: false,
@@ -53,6 +53,10 @@
     toastEl.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2000);
+  }
+
+  function tapHaptic() {
+    if (navigator.vibrate) navigator.vibrate(8);
   }
 
   function updateDisplay() {
@@ -800,6 +804,7 @@
     // Number buttons
     $$('.btn[data-value]').forEach(btn => {
       btn.addEventListener('click', () => {
+        tapHaptic();
         handleInput('num', btn.dataset.value);
       });
     });
@@ -807,6 +812,7 @@
     // Action buttons
     $$('.btn[data-action]').forEach(btn => {
       btn.addEventListener('click', () => {
+        tapHaptic();
         handleInput(btn.dataset.action);
       });
     });
@@ -814,6 +820,7 @@
     // Scientific buttons
     $$('.sci-btn').forEach(btn => {
       btn.addEventListener('click', () => {
+        tapHaptic();
         applySci(btn.textContent);
       });
     });
@@ -821,6 +828,7 @@
     // Mode tabs
     $$('.mode-tab').forEach(tab => {
       tab.addEventListener('click', () => {
+        tapHaptic();
         $$('.mode-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         state.mode = tab.dataset.mode;
@@ -946,6 +954,30 @@
       }
     });
 
+    // Memory buttons
+    $$('.mem-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var action = btn.dataset.mem;
+        var cur = parseFloat(state.display);
+        if (isNaN(cur) && action !== 'mc') return;
+        switch (action) {
+          case 'mc': state.memory = 0; showToast('🗑️ تم مسح الذاكرة'); break;
+          case 'mr':
+            if (state.memory === 0 && !localStorage.getItem('calcMemory')) return;
+            state.display = formatNum(state.memory);
+            state.resetNext = true;
+            state.justEvaluated = false;
+            state.expression = '';
+            break;
+          case 'mplus': state.memory += cur; showToast('📥 M+'); break;
+          case 'mminus': state.memory -= cur; showToast('📤 M−'); break;
+        }
+        localStorage.setItem('calcMemory', state.memory);
+        updateMemIndicator();
+        updateDisplay();
+      });
+    });
+
     // Keyboard support
     document.addEventListener('keydown', (e) => {
       if (e.key >= '0' && e.key <= '9') {
@@ -1030,6 +1062,16 @@
     });
   }
 
+  // --- Memory Indicator ---
+  function updateMemIndicator() {
+    var ind = $('#memIndicator');
+    if (state.memory !== 0) {
+      ind.classList.add('show');
+    } else {
+      ind.classList.remove('show');
+    }
+  }
+
   // --- Init ---
   function init() {
     document.body.classList.toggle('light', state.theme === 'light');
@@ -1043,6 +1085,7 @@
     bindEvents();
     registerSW();
     checkForUpdate();
+    updateMemIndicator();
 
     // Init age selects and restore saved date
     initAgeSelects();
