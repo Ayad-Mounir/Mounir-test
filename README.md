@@ -23,7 +23,7 @@
   <br/>
 
   <p align="center">
-    <img src="https://img.shields.io/badge/version-1.08-6c63ff?style=flat-square" alt="Version 1.08"/>
+    <img src="https://img.shields.io/badge/version-1.12-6c63ff?style=flat-square" alt="Version 1.12"/>
     <img src="https://img.shields.io/badge/PWA-ready-6c63ff?style=flat-square" alt="PWA Ready"/>
     <img src="https://img.shields.io/badge/license-MIT-6c63ff?style=flat-square" alt="MIT License"/>
     <img src="https://img.shields.io/badge/AR%20%7C%20FR%20%7C%20EN-6c63ff?style=flat-square" alt="Languages"/>

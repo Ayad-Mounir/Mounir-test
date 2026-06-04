@@ -41,8 +41,11 @@
   function formatNum(n) {
     if (n === Infinity || n === -Infinity) return 'Infinity';
     if (typeof n !== 'number' || isNaN(n)) return 'خطأ';
-    const s = n.toPrecision(12);
-    return parseFloat(s).toString();
+    // Clean floating-point artifacts, then add thousand separators
+    var str = parseFloat(n.toPrecision(12)).toString();
+    var parts = str.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return parts.join('.');
   }
 
   function showToast(msg) {
@@ -849,6 +852,41 @@
       localStorage.setItem('calcCurrency', state.currency);
       if (state.mode === 'convert') updateConvert();
     });
+
+    // Copy result on display tap
+    displayEl.addEventListener('click', function() {
+      var txt = state.display;
+      if (!txt || txt === '0' || txt === 'خطأ' || txt === 'Infinity') return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt.replace(/,/g, '')).then(function() {
+          showToast('📋 تم النسخ');
+        }).catch(function(){});
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = txt.replace(/,/g, '');
+        ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); showToast('📋 تم النسخ'); } catch(e) {}
+        document.body.removeChild(ta);
+      }
+    });
+
+    // Long-press backspace to clear all
+    var bsBtn = document.querySelector('[data-action="backspace"]');
+    var lpTimer = null;
+    function startLongPress() {
+      lpTimer = setTimeout(function() { clearAll(); lpTimer = null; }, 500);
+    }
+    function cancelLongPress() {
+      if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+    }
+    bsBtn.addEventListener('mousedown', startLongPress);
+    bsBtn.addEventListener('mouseup', cancelLongPress);
+    bsBtn.addEventListener('mouseleave', cancelLongPress);
+    bsBtn.addEventListener('touchstart', startLongPress, { passive: true });
+    bsBtn.addEventListener('touchend', cancelLongPress);
+    bsBtn.addEventListener('touchcancel', cancelLongPress);
 
     // Age calculator
     function calcAndSaveAge() {
