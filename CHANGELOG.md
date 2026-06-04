@@ -1,5 +1,17 @@
 # 📋 Changelog
 
+## v1.16 (2026-06-04)
+### ✨ UI Overhaul
+- **Facelift كامل للواجهة** — تصميم فاخر واحترافي
+- **🔢 Mode Tabs مع أيقونات** — كل تبويب أيقونتو
+- **✨ Display Gradient** — النتيجة فيها gradient جميل
+- **🥃 Glassmorphism أعمق** — blur + شفافية للبطاقات
+- **🎨 ألوان محسّنة** — Rose gold accent (#f472b6)
+- **🔘 Buttons refined** — borders ناعمة، ظلال، hover محسّن
+- **🔄 Animations ناعمة** — fadeSlideIn للوحات
+- **🖥️ Desktop view** — ظل + border-radius للشاشات الكبيرة
+
+---
 ## v1.15 (2026-06-04)
 ### 🐛 Fixes
 - **10000**: إصلاح "undefined آلاف" ← "عشرة آلاف" فـ numToAr
