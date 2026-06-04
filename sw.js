@@ -4,10 +4,10 @@ self.addEventListener("install", (e) => {
   e.waitUntil(
     caches.open(CACHE).then((c) =>
       c.addAll([
-        "/Mounir-test/",
-        "/Mounir-test/index.html",
-        "/Mounir-test/style.css",
-        "/Mounir-test/script.js",
+        "/calcmaster-pro/",
+        "/calcmaster-pro/index.html",
+        "/calcmaster-pro/style.css",
+        "/calcmaster-pro/script.js",
       ])
     )
   );

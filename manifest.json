@@ -2,7 +2,7 @@
   "name": "CalcMaster Pro",
   "short_name": "CalcMaster",
   "description": "آلة حاسبة احترافية",
-  "start_url": "/Mounir-test/index.html",
+  "start_url": "/calcmaster-pro/index.html",
   "display": "standalone",
   "background_color": "#0a0a1a",
   "theme_color": "#6c63ff",
