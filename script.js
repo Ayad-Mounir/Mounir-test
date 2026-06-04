@@ -843,15 +843,11 @@
       });
     });
 
-    // Currency buttons
-    $$('.curr-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        $$('.curr-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.currency = btn.dataset.curr;
-        localStorage.setItem('calcCurrency', state.currency);
-        if (state.mode === 'convert') updateConvert();
-      });
+    // Currency select
+    $('#currSelect').addEventListener('change', function() {
+      state.currency = this.value;
+      localStorage.setItem('calcCurrency', state.currency);
+      if (state.mode === 'convert') updateConvert();
     });
 
     // Age calculator
@@ -1003,9 +999,7 @@
     $$('.lang-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.lang === state.convertLang);
     });
-    $$('.curr-btn').forEach(b => {
-      b.classList.toggle('active', b.dataset.curr === state.currency);
-    });
+    $('#currSelect').value = state.currency;
     renderHistory();
     updateDisplay();
     bindEvents();

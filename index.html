@@ -6,13 +6,13 @@
   <meta name="theme-color" content="#0a0a1a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="manifest.json?v=1.10">
+  <link rel="manifest" href="manifest.json?v=1.11">
   <link rel="icon" href="icon-192.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon-192.svg">
   <title>CalcMaster Pro</title>
-  <meta name="app-version" content="1.10">
+  <meta name="app-version" content="1.11">
   <meta name="app-build" content="2026-06-04">
-  <link rel="stylesheet" href="style.css?v=1.10">
+  <link rel="stylesheet" href="style.css?v=1.11">
   <style>
     #updateBanner {
       display: none;
@@ -124,7 +124,7 @@
         <div class="brand">
           <span class="brand-icon">∑</span>
           <span class="brand-text">CalcMaster</span>
-          <span class="version-badge" id="headerVer">v1.10</span>
+          <span class="version-badge" id="headerVer">v1.11</span>
         </div>
       </div>
       <div class="header-right">
@@ -230,11 +230,13 @@
           <button class="lang-btn" data-lang="en">EN</button>
         </div>
         <div class="curr-selector">
-          <button class="curr-btn active" data-curr="">🔢</button>
-          <button class="curr-btn" data-curr="MAD">🇲🇦</button>
-          <button class="curr-btn" data-curr="USD">🇺🇸</button>
-          <button class="curr-btn" data-curr="EUR">🇪🇺</button>
-          <button class="curr-btn" data-curr="GBP">🇬🇧</button>
+          <select class="curr-select" id="currSelect">
+            <option value="">🔢 بدون عملة</option>
+            <option value="MAD">🇲🇦 درهم مغربي (MAD)</option>
+            <option value="USD">🇺🇸 دولار أمريكي (USD)</option>
+            <option value="EUR">🇪🇺 يورو (EUR)</option>
+            <option value="GBP">🇬🇧 جنيه إسترليني (GBP)</option>
+          </select>
         </div>
         <div class="convert-output" id="convertOutput" dir="auto"></div>
       </div>
@@ -270,10 +272,10 @@
     </div>
 
     <footer>
-      <span>CalcMaster Pro v<span id="verDisplay">1.10</span> © 2026</span>
+      <span>CalcMaster Pro v<span id="verDisplay">1.11</span> © 2026</span>
     </footer>
   </div>
 
-  <script src="script.js?v=1.10"></script>
+  <script src="script.js?v=1.11"></script>
 </body>
 </html>
